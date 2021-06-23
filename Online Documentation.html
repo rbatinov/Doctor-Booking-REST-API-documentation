@@ -1,0 +1,2362 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open Sans">
+    <title>RestAPI Запазване на час при лекар | Eng. Radoslav Batinov</title>
+    <style>
+        .customContainer {
+            padding: 16px;
+            background-color: rgb(241, 253, 241);
+            border-radius: 50px;
+        }
+
+        ul {
+            text-align: center;
+            list-style-type: none;
+            background-color: rgb(241, 253, 241);
+        }
+
+        .customUL {
+            text-align: left;
+            list-style-type: decimal;
+        }
+
+        tr:nth-child(even) {
+            background-color: rgb(224, 252, 224);
+        }
+
+        tr:first-child {
+            background-color: rgb(145, 211, 145);
+            color: white;
+            text-align: center;
+        }
+
+        table,
+        tr {
+            width: 100%;
+            white-space: normal;
+            /* text-align: center; */
+        }
+
+        .CustomTable {
+            text-align: center !important;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            font-family: "Open Sans";
+            font-size: 20px;
+
+        }
+
+        h1{
+            border-radius:50px;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4 {
+            text-align: center;
+        }
+
+        h1 {
+            background-color: rgba(136, 199, 136);
+            color: white;
+        }
+
+        h2 {
+            background-color: rgb(147, 207, 147);
+            color: white;
+        }
+
+        h3 {
+            background-color: rgb(156, 218, 156);
+            color: white;
+        }
+
+        h4 {
+            background-color: rgb(157, 219, 157);
+            color: white;
+        }
+
+        h1::before,
+        h2::before,
+        h3::before,
+        h4::before {
+            content: "---- "
+        }
+
+        h1::after,
+        h2::after,
+        h3::after,
+        h4::after {
+            content: " ----"
+        }
+
+
+        .customSidebar {
+            display: inline-block;
+        }
+
+        .customSidebar {
+            height: 100%;
+            width: 320px;
+            position: fixed;
+            z-index: 1;
+            top: 0;
+            left: 0;
+            background-color: rgb(99, 175, 99);
+            ;
+            overflow-x: hidden;
+            padding-top: 20px;
+        }
+
+        .main {
+            margin-left: 320px;
+        }
+
+        .customSidebar a,
+        span {
+            padding: 6px 8px 6px 16px;
+            text-decoration: none;
+            font-size: 25px;
+            color: white;
+            display: block;
+        }
+
+        .customSidebar a:hover {
+            color: #e4cd4a;
+        }
+
+        footer {
+            text-align: center;
+            padding-bottom: 10px;
+            font-weight: bold;
+        }
+    </style>
+
+</head>
+
+<body>
+
+
+
+
+    <div class="customSidebar">
+        <span><strong>Съдържание</strong></span>
+        <p><a href="#_Toc57892339">УВОД</a></p>
+        <p><a href="#_Toc57892351">Документация в POSTMAN</a></p>
+        <p><a href="#_Toc57892340">Описание на Методи</a></p>
+        <p><a href="#_Toc57892342">2.1. GET List All Doctors Paginated</a></p>
+        <p><a href="#_Toc57892343">2.2. GET Search Doctors</a></p>
+        <p><a href="#_Toc57892344">2.3. GET Doctor Available Days and Hours</a></p>
+        <p><a href="#_Toc57892345">2.4. GET All Reasons</a></p>
+        <p><a href="#_Toc57892346">2.5. POST Create Booking</a></p>
+        <p><a href="#_Toc57892347">2.6. PUT Update Booking</a></p>
+        <p><a href="#_Toc57892348">2.7. DELETE Cancel Booking</a></p>
+        <p><a href="#_Toc57892352">2.8. GET Booking Info</a></p>
+        <p><a href="#_Toc57892349">2.9. Error Handling</a></p>
+        <p><a href="#_Toc57892350">2.10. Кодове на грешки</a></p>
+    </div>
+
+    <div class=main>
+
+        <h1><a name="_Toc57892339"></a>УВОД</h1>
+        <div class="customContainer">
+
+            <p>Целта на курсовия проект е да се разработи RESTful API за запазване на час при лекар. API-то трябва да
+                извършва следните задачи:</p>
+            <ul class="customUL">
+                <li>Да връща данни за всички налични в системата лекари.</li>
+                <li>Да има възможност за търсене на лекар по въведени критерии.</li>
+                <li>Да връща данни за свободен ден и час на избран лекар.</li>
+                <li>Да извършва запис на запазения час в системата.</li>
+                <li>Да обновява информация за запазен час.</li>
+                <li>Да анулира запазен час.</li>
+            </ul>
+            <p>&nbsp;</p>
+            <p>За целта е разработена база данни, която да съхранява следните данни:</p>
+            <ul class="customUL">
+                <li>Информация за лекарите</li>
+                <li>Работно време на лекарите</li>
+                <li>Специализации на лекарите</li>
+                <li>Почивни дни на лекарите</li>
+                <li>Данни за запазените часове</li>
+                <li>Данни за пациента</li>
+                <li>Информация за причини на посещения при лекар</li>
+            </ul>
+            <p>&nbsp;</p>
+            <p>За програмната реализация е използван MS SQL Server за базата данни. За реализирането на API-то е
+                използван езикът за програмиране C#.</p>
+            <p>Използваните развойни среди за разработка са SQL Server Management Studio и Microsoft Visual Studio 2017.
+            </p>
+            <p>Разработеното API може да бъде внедрено в системата за здравеопазване като би предлагало лесно и удобно
+                запазване на часове при различни лекари.</p>
+            <p>API-то има възможни различни направления за развитие, които могат да бъдат разработени, в зависимост от
+                нуждите.</p>
+            <p>&nbsp;</p>
+
+        </div>
+
+
+        <h1><a name="_Toc57892351"></a>Документация в POSTMAN</h1>
+
+        <div class="customContainer">
+            <p>Документация в POSTMAN може да бъде видяна <a
+                    href="https://documenter.getpostman.com/view/13413610/TVmQcvQb#12acb33c-3d5d-4230-bd52-7b6b90fbb480" target="_blank">тук.</a></p>
+        </div>
+
+        <h1><a name="_Toc57892340"></a>Описание на Методи</h1>
+
+        <div class="customContainer">
+            <p>Методите се изпълняват чрез удостоверяване с <strong>API KEY</strong>.</p>
+        </div>
+        <br>
+        <table class="customTable" width="0">
+            <tbody>
+                <tr>
+                    <td>
+                        <p><strong>key</strong></p>
+                    </td>
+                    <td>
+                        <p><strong>APIkey</strong></p>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <p><strong>value</strong></p>
+                    </td>
+                    <td style="color:red">
+                        <p>Your key here</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <p>&nbsp;</p>
+        <h3><a name="_Toc57892342"></a>2.1. GET List All Doctors Paginated</h3>
+        <ul>
+            <li>Методът връща данни за всички налични лекари в системата</li>
+        </ul>
+        <p>&nbsp;</p>
+        <h4>2.1.1. Параметри</h4>
+        <table class="CustomTable">
+            <tbody>
+                <tr>
+                    <td width="155">
+                        <p><strong>ПАРАМЕТЪР</strong></p>
+                    </td>
+                    <td width="133">
+                        <p><strong>ТИП ДАННИ</strong></p>
+                    </td>
+                    <td width="151">
+                        <p><strong>ОПИСАНИЕ</strong></p>
+                    </td>
+                    <td width="128">
+                        <p><strong>ЗАБЕЛЕЖКИ</strong></p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="155">
+                        <p><strong>PageNum</strong></p>
+                    </td>
+                    <td width="133">
+                        <p>Integer</p>
+                    </td>
+                    <td width="151">
+                        <p>Номер на страницата, която желаете да бъде върната.<br /> <em>(Стойност по подразбиране е
+                                1)</em></p>
+                    </td>
+                    <td width="128">
+                        <p>Допустими стойности са PageNum &gt; 0</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="155">
+                        <p><strong>PageSize</strong></p>
+                    </td>
+                    <td width="133">
+                        <p>Integer</p>
+                    </td>
+                    <td width="151">
+                        <p>Колко записа да бъдат върнати за конкретната страница.<br /> <em>(Стойност по подразбиране е
+                                10)</em></p>
+                    </td>
+                    <td width="128">
+                        <p>Допустими стойности са PageSize &gt; 0</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="155">
+                        <p><strong>type </strong></p>
+                    </td>
+                    <td width="133">
+                        <p>String</p>
+                    </td>
+                    <td width="151">
+                        <p>Тип на върнатия резултат.</p>
+                    </td>
+                    <td width="128">
+                        <p>Възможни параметри са <strong>json</strong> или <strong>xml</strong>.</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <p>&nbsp;</p>
+        <h4>2.1.2. Примери</h4>
+        <table class="Examples">
+            <tbody class="Examples">
+                <tr>
+                    <td>
+                        <p><a
+                                href="http://localhost:{{PortNumber}}/api/doctors/PageNum/1/PageSize/10?type=json">http://localhost:{{PortNumber}}/api/doctors/PageNum/1/PageSize/10?type=json</a>
+                        </p>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <p>[</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;{</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"id":&nbsp;174,</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"fnm":&nbsp;"Дафина",</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"snm":&nbsp;"Колева",</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"sal_nme":&nbsp;"Д-р",</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"spec_nme":&nbsp;"Акушер-гинеколог",</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"bio":&nbsp;"Additional Information.",</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"img_url":&nbsp;"/Images/ProfilePictures/Default/doctor-default.png",
+                        </p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"max_bok_day":&nbsp;60,</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"city_nme":&nbsp;"Бургас",</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"eml":&nbsp;"pn@abv.bg",</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"tel":&nbsp;"0884719728",</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"ful_nme":&nbsp;"Дафина&nbsp;Колева",</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"first_avl_day":&nbsp;"2020-12-06T00:00:00"
+                        </p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;},</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;{</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"id":&nbsp;149,</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"fnm":&nbsp;"Стефания",</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"snm":&nbsp;"Петкова",</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"sal_nme":&nbsp;"Д-р",</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"spec_nme":&nbsp;"Алерголог",</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"bio":&nbsp;"Additional Information.",</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"img_url":&nbsp;"/Images/ProfilePictures/Stefani.jpg",
+                        </p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"max_bok_day":&nbsp;60,</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"city_nme":&nbsp;"Кърджали",</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"eml":&nbsp;"mt@abv.bg",</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"tel":&nbsp;"0887867421",</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"ful_nme":&nbsp;"Стефания&nbsp;Петкова",</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"first_avl_day":&nbsp;"2020-12-01T00:00:00"
+                        </p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;}</p>
+                        <p>]</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <h4>2.1.3. Описание на Response</h4>
+        <table class="CustomTable" width="0">
+            <tbody>
+                <tr>
+                    <td width="173">
+                        <p><strong>RESPONSE KEY</strong></p>
+                    </td>
+                    <td width="470">
+                        <p><strong>ОПИСАНИЕ</strong></p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="173">
+                        <p><strong>i</strong><strong>d</strong></p>
+                    </td>
+                    <td width="470">
+                        <p>Id на лекаря</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="173">
+                        <p><strong>fnm</strong></p>
+                    </td>
+                    <td width="470">
+                        <p>Име на лекаря</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="173">
+                        <p><strong>snm</strong></p>
+                    </td>
+                    <td width="470">
+                        <p>Фамилия</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="173">
+                        <p><strong>sal_nme</strong></p>
+                    </td>
+                    <td width="470">
+                        <p>Титла</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="173">
+                        <p><strong>spec_nme</strong></p>
+                    </td>
+                    <td width="470">
+                        <p>Наименование на специализацията му</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="173">
+                        <p><strong>bio</strong></p>
+                    </td>
+                    <td width="470">
+                        <p>Биография на лекаря</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="173">
+                        <p><strong>img_url</strong></p>
+                    </td>
+                    <td width="470">
+                        <p>Снимка на лекаря</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="173">
+                        <p><strong>max_bok_day</strong></p>
+                    </td>
+                    <td width="470">
+                        <p>Максимум дни напред, в които може да се запазва час при конкретния лекар</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="173">
+                        <p><strong>city_nme</strong></p>
+                    </td>
+                    <td width="470">
+                        <p>Град, в който лекаря работи</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="173">
+                        <p><strong>eml</strong></p>
+                    </td>
+                    <td width="470">
+                        <p>e-mail за контакт с лекаря</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="173">
+                        <p><strong>tel</strong></p>
+                    </td>
+                    <td width="470">
+                        <p>Телефон за контакт с лекаря</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="173">
+                        <p><strong>ful_nme</strong></p>
+                    </td>
+                    <td width="470">
+                        <p>Пълно име на лекаря</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="173">
+                        <p><strong>first_avl_day</strong></p>
+                    </td>
+                    <td width="470">
+                        <p>Първа свободна дата за запазване на час</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <p>&nbsp;</p>
+        <p>&nbsp;</p>
+        <h3><a name="_Toc57892343"></a>2.2. GET Search Doctors</h3>
+        <ul>
+            <li>Търсене на лекар по зададени критерии.</li>
+            <li>Може да се търси по един или повече от един параметъра.</li>
+        </ul>
+        <p>&nbsp;</p>
+        <h4>2.2.1. Параметри</h4>
+        <table class="CustomTable">
+            <tbody>
+                <tr>
+                    <td width="155">
+                        <p><strong>ПАРАМЕТЪР</strong></p>
+                    </td>
+                    <td width="133">
+                        <p><strong>ТИП ДАННИ</strong></p>
+                    </td>
+                    <td width="152">
+                        <p><strong>ОПИСАНИЕ</strong></p>
+                    </td>
+                    <td width="128">
+                        <p><strong>ЗАБЕЛЕЖКИ</strong></p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="155">
+                        <p><strong>DocId</strong></p>
+                    </td>
+                    <td width="133">
+                        <p>Integer</p>
+                    </td>
+                    <td width="152">
+                        <p>Id на лекаря</p>
+                    </td>
+                    <td width="128">
+                        <p><br /> Допустими стойности са DocID &gt; 0</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="155">
+                        <p><strong>FullName</strong></p>
+                    </td>
+                    <td width="133">
+                        <p>String</p>
+                    </td>
+                    <td width="152">
+                        <p>Име на лекаря</p>
+                    </td>
+                    <td width="128">
+                        <p>Може да бъде първо име, цяло име, или част от името.</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="155">
+                        <p><strong>CityId</strong></p>
+                    </td>
+                    <td width="133">
+                        <p>Integer</p>
+                    </td>
+                    <td width="152">
+                        <p>ID на града, в който работи</p>
+                    </td>
+                    <td width="128">
+                        <p>Трябва да е по-голямо от 0.</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="155">
+                        <p><strong>SpecId</strong></p>
+                    </td>
+                    <td width="133">
+                        <p>Integer</p>
+                    </td>
+                    <td width="152">
+                        <p>ID на специалността на лекаря</p>
+                    </td>
+                    <td width="128">
+                        <p>Трябва да е по-голямо от 0.</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="155">
+                        <p><strong>Eml</strong></p>
+                    </td>
+                    <td width="133">
+                        <p>String</p>
+                    </td>
+                    <td width="152">
+                        <p>e-mail на лекаря</p>
+                    </td>
+                    <td width="128">
+                        <p>Трябва да е в коректен mail формат.</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="155">
+                        <p><strong>Tel</strong></p>
+                    </td>
+                    <td width="133">
+                        <p>Integer</p>
+                    </td>
+                    <td width="152">
+                        <p>Телефон на лекаря</p>
+                    </td>
+                    <td width="128">
+                        <p>Трябва да съдържа само цифри.</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="155">
+                        <p><strong>type</strong></p>
+                    </td>
+                    <td width="133">
+                        <p>String</p>
+                    </td>
+                    <td width="152">
+                        <p>Тип на върнатия резултат.</p>
+                    </td>
+                    <td width="128">
+                        <p>Възможни параметри са <strong>json</strong> или <strong>xml</strong>.</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <p>&nbsp;</p>
+        <h4>2.2.2. Примери</h4>
+        <table class="Examples">
+            <tbody>
+                <tr>
+                    <td width="566">
+                        <p><a
+                                href="http://localhost:%7bport_number%7d/api/doctors?DocId=3&amp;type=json">http://localhost:{port_number}/api/doctors?DocId=3&amp;type=json</a>
+                        </p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="566">
+                        <p>[</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;{</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"id":&nbsp;3,</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"fnm":&nbsp;"Петър",</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"snm":&nbsp;"Стоянов",</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"sal_nme":&nbsp;"Д-р",</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"spec_nme":&nbsp;"Кардиолог",</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"bio":&nbsp;"Кратка&nbsp;информация&nbsp;за&nbsp;Петър&nbsp;Стоянов",
+                        </p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"img_url":&nbsp;"/Images/ProfilePictures/Default/doctor-default.png",
+                        </p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"max_bok_day":&nbsp;60,</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"city_nme":&nbsp;"София",</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"eml":&nbsp;"ps@gmail.com",</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"tel":&nbsp;"0892222222",</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"ful_nme":&nbsp;"Петър&nbsp;Стоянов",</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"first_avl_day":&nbsp;"2020-12-05T00:00:00"
+                        </p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;}</p>
+                        <p>]</p>
+                        <p>&nbsp;</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <h4>2.2.3. Описание на Response</h4>
+        <table class="CustomTable" width="0">
+            <tbody>
+                <tr>
+                    <td width="173">
+                        <p><strong>RESPONSE KEY</strong></p>
+                    </td>
+                    <td width="470">
+                        <p><strong>ОПИСАНИЕ</strong></p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="173">
+                        <p><strong>i</strong><strong>d</strong></p>
+                    </td>
+                    <td width="470">
+                        <p>Id на лекаря</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="173">
+                        <p><strong>fnm</strong></p>
+                    </td>
+                    <td width="470">
+                        <p>Име на лекаря</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="173">
+                        <p><strong>snm</strong></p>
+                    </td>
+                    <td width="470">
+                        <p>Фамилия</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="173">
+                        <p><strong>sal_nme</strong></p>
+                    </td>
+                    <td width="470">
+                        <p>Титла</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="173">
+                        <p><strong>spec_nme</strong></p>
+                    </td>
+                    <td width="470">
+                        <p>Наименование на специализацията му</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="173">
+                        <p><strong>bio</strong></p>
+                    </td>
+                    <td width="470">
+                        <p>Биография на лекаря</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="173">
+                        <p><strong>img_url</strong></p>
+                    </td>
+                    <td width="470">
+                        <p>Снимка на лекаря</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="173">
+                        <p><strong>max_bok_day</strong></p>
+                    </td>
+                    <td width="470">
+                        <p>Максимум дни напред, в които може да се запазва час при конкретния лекар</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="173">
+                        <p><strong>city_nme</strong></p>
+                    </td>
+                    <td width="470">
+                        <p>Град, в който лекаря работи</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="173">
+                        <p><strong>eml</strong></p>
+                    </td>
+                    <td width="470">
+                        <p>e-mail за контакт с лекаря</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="173">
+                        <p><strong>tel</strong></p>
+                    </td>
+                    <td width="470">
+                        <p>Телефон за контакт с лекаря</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="173">
+                        <p><strong>ful_nme</strong></p>
+                    </td>
+                    <td width="470">
+                        <p>Пълно име на лекаря</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="173">
+                        <p><strong>first_avl_day</strong></p>
+                    </td>
+                    <td width="470">
+                        <p>Първа свободна дата за запазване на час</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <p>&nbsp;</p>
+        <p>&nbsp;</p>
+        <p>&nbsp;</p>
+        <p>&nbsp;</p>
+        <h3><a name="_Toc57892344"></a>2.3. GET Doctor Available Days and Hours</h3>
+        <ul>
+            <li>Връща данни за дните, в които лекарят има свободни часове.</li>
+            <li>Може да се използва за проверка на конкретна дата &ndash; в този случай подайте на NumDays = 0.</li>
+            <li>Когато NumDays &gt; 0 то ще връща N дни след входната дата <strong>Date</strong> и информация за
+                свободните часове.</li>
+        </ul>
+        <p>&nbsp;</p>
+        <h4>2.3.1. Параметри</h4>
+        <table class="CustomTable">
+            <tbody>
+                <tr>
+                    <td width="155">
+                        <p><strong>ПАРАМЕТЪР</strong></p>
+                    </td>
+                    <td width="133">
+                        <p><strong>ТИП ДАННИ</strong></p>
+                    </td>
+                    <td width="151">
+                        <p><strong>ОПИСАНИЕ</strong></p>
+                    </td>
+                    <td width="128">
+                        <p><strong>ЗАБЕЛЕЖКИ</strong></p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="155">
+                        <p><strong>DocId</strong></p>
+                    </td>
+                    <td width="133">
+                        <p>Integer</p>
+                    </td>
+                    <td width="151">
+                        <p>Id на лекаря</p>
+                    </td>
+                    <td width="128">
+                        <p><br /> Трябва да е по-голямо от 0.</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="155">
+                        <p><strong>Date</strong></p>
+                    </td>
+                    <td width="133">
+                        <p>String</p>
+                    </td>
+                    <td width="151">
+                        <p>Начална дата, от която да започне проверката</p>
+                    </td>
+                    <td width="128">
+                        <p>Трябва да е форматирана по следния начин: yyyy-MM-dd</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="155">
+                        <p><strong>NumDays</strong></p>
+                    </td>
+                    <td width="133">
+                        <p>Integer</p>
+                    </td>
+                    <td width="151">
+                        <p>Брой дни</p>
+                    </td>
+                    <td width="128">
+                        <p>Определя колко дни напред от календара спрямо днешна дата, да се върнат. Ако искате да се
+                            провери дали конкретна дата е свободна и наличните й часове, то подайте на този параметър 0.
+                            Параметърът трябва да е по-голям или равен на 0.</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="155">
+                        <p><strong>type</strong></p>
+                    </td>
+                    <td width="133">
+                        <p>String</p>
+                    </td>
+                    <td width="151">
+                        <p>Тип на върнатия резултат.</p>
+                    </td>
+                    <td width="128">
+                        <p>Възможни параметри са <strong>json</strong> или <strong>xml</strong>.</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <p>&nbsp;</p>
+        <h4>2.3.2. Примери</h4>
+        <table class="Examples">
+            <tbody>
+                <tr>
+                    <td width="566">
+                        <p><a
+                                href="http://localhost:{{PortNumber}}/api/doctors/docId/3/date/2020-12-05/NumDays/3/available-days?type=json">http://localhost:{{PortNumber}}/api/doctors/docId/3/date/2020-12-05/NumDays/3/available-days?type=json</a>
+                        </p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="566">
+                        <p>[</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;{</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"_date":&nbsp;"2020-12-01T00:00:00",</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"is_avl":&nbsp;0,</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"avl_time":&nbsp;"00:00",</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"weekday_name":&nbsp;"Tuesday"</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;},</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;{</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"_date":&nbsp;"2020-12-02T00:00:00",</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"is_avl":&nbsp;0,</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"avl_time":&nbsp;"00:00",</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"weekday_name":&nbsp;"Wednesday"</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;},</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;{</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"_date":&nbsp;"2020-12-03T00:00:00",</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"is_avl":&nbsp;0,</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"avl_time":&nbsp;"00:00",</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"weekday_name":&nbsp;"Thursday"</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;}</p>
+                        <p>]</p>
+                        <p>&nbsp;</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <p>&nbsp;</p>
+        <h4>2.3.3. Описание на Response</h4>
+        <table class="CustomTable" width="0">
+            <tbody>
+                <tr>
+                    <td width="173">
+                        <p><strong>RESPONSE KEY</strong></p>
+                    </td>
+                    <td width="470">
+                        <p><strong>ОПИСАНИЕ</strong></p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="173">
+                        <p><strong>date</strong></p>
+                    </td>
+                    <td width="470">
+                        <p>Дата</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="173">
+                        <p><strong>is_avl</strong></p>
+                    </td>
+                    <td width="470">
+                        <p>Флаг дали е свободен денят &ndash; 1 за свободен; 0 &ndash; няма свободни часове;</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="173">
+                        <p><strong>avl_time</strong></p>
+                    </td>
+                    <td width="470">
+                        <p>Час, който може да бъде запазен. <br /> <em>(Когато </em><em>is_avl = 0</em><em>, то този час
+                                по подразбиране ще е равен на 00:00)</em></p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="173">
+                        <p><strong>weekday_name</strong></p>
+                    </td>
+                    <td width="470">
+                        <p>Наименование на деня</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <p>&nbsp;</p>
+        <p>&nbsp;</p>
+        <h3><a name="_Toc57892345"></a>2.4. GET Get Available Reasons</h3>
+        <ul>
+            <li>Връща данни за всички налични в системата причини за запазване на час.</li>
+        </ul>
+        <p>&nbsp;</p>
+        <h4>2.4.1. Параметри</h4>
+        <table class="CustomTable">
+            <tbody>
+                <tr>
+                    <td width="155">
+                        <p><strong>ПАРАМЕТЪР</strong></p>
+                    </td>
+                    <td width="133">
+                        <p><strong>ТИП ДАННИ</strong></p>
+                    </td>
+                    <td width="151">
+                        <p><strong>ОПИСАНИЕ</strong></p>
+                    </td>
+                    <td width="128">
+                        <p><strong>ЗАБЕЛЕЖКИ</strong></p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="155">
+                        <p><strong>type</strong></p>
+                    </td>
+                    <td width="133">
+                        <p>String</p>
+                    </td>
+                    <td width="151">
+                        <p>Тип на върнатия резултат.</p>
+                    </td>
+                    <td width="128">
+                        <p>Възможни параметри са <strong>json</strong> или <strong>xml</strong>.</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <p>&nbsp;</p>
+        <p>&nbsp;</p>
+        <h4>2.4.2. Примери</h4>
+        <table class="Examples">
+            <tbody>
+                <tr>
+                    <td width="566">
+                        <p><a
+                                href="http://localhost:{{PortNumber}}/api/bookings/reasons?type=json">http://localhost:{{PortNumber}}/api/bookings/reasons?type=json</a>
+                        </p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="566">
+                        <p>[</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;{</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"id":&nbsp;1,</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"nme":&nbsp;"Първичен&nbsp;преглед"</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;},</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;{</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"id":&nbsp;2,</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"nme":&nbsp;"Вторичен&nbsp;преглед"</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;},</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;{</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"id":&nbsp;3,</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"nme":&nbsp;"Профилактичен&nbsp;преглед"</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;},</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;{</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"id":&nbsp;4,</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"nme":&nbsp;"Детска&nbsp;консултация"</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;}</p>
+                        <p>]</p>
+                        <p>&nbsp;</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <p>&nbsp;</p>
+        <h4>2.4.3. Описание на Response</h4>
+        <table class="CustomTable" width="0">
+            <tbody>
+                <tr>
+                    <td width="173">
+                        <p><strong>RESPONSE KEY</strong></p>
+                    </td>
+                    <td width="470">
+                        <p><strong>ОПИСАНИЕ</strong></p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="173">
+                        <p><strong>id</strong></p>
+                    </td>
+                    <td width="470">
+                        <p>Id на причина за запазване на час</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="173">
+                        <p><strong>nme</strong></p>
+                    </td>
+                    <td width="470">
+                        <p>Наименование на причината</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <p>&nbsp;</p>
+        <p>&nbsp;</p>
+        <h3><a name="_Toc57892346"></a>2.5. POST Create Booking</h3>
+        <ul>
+            <li>Метод за създаване на запис в базата данни, който пази информация за запазения час.</li>
+            <li>Методът извършва следните проверки:
+                <ul>
+                    <li>Не може да се запазва час на предишна дата.</li>
+                    <li>Не може да се запазва час в ден, който е по-голям от днешния + max_bok_days. Т.е. ако
+                        max_bok_days = 30 и днешна дата е 01.12.2020г., то 30.12.2020г. е последният ден, в който може
+                        да се запази час. Този параметър се настройва динамично за всеки лекар.</li>
+                    <li>Не може да се запазва час в ден, в който лекарят не работи &ndash; в случай, че бъде подадена
+                        такава дата като входен параметър.</li>
+                    <li>Не може да се запазва час във време, в което лекарят не е на смяна.</li>
+                    <li>Запазен час не може да се дублира.</li>
+                </ul>
+            </li>
+        </ul>
+        <p>&nbsp;</p>
+        <h4>2.5.1. Параметри</h4>
+        <table class="CustomTable">
+            <tbody>
+                <tr>
+                    <td width="147">
+                        <p><strong>ПАРАМЕТЪР</strong></p>
+                    </td>
+                    <td width="122">
+                        <p><strong>ТИП ДАННИ</strong></p>
+                    </td>
+                    <td width="172">
+                        <p><strong>ОПИСАНИЕ</strong></p>
+                    </td>
+                    <td width="125">
+                        <p><strong>ЗАБЕЛЕЖКИ</strong></p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="147">
+                        <p><strong>Fname</strong></p>
+                    </td>
+                    <td width="122">
+                        <p>String</p>
+                    </td>
+                    <td width="172">
+                        <p>Име на пациент.</p>
+                    </td>
+                    <td width="125">
+                        <p>Дължина &ndash; 50 символа.<br /> <em>(позволени са само букви)</em></p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="147">
+                        <p><strong>Lname</strong></p>
+                    </td>
+                    <td width="122">
+                        <p>String</p>
+                    </td>
+                    <td width="172">
+                        <p>Фамилия на пациент</p>
+                    </td>
+                    <td width="125">
+                        <p>Дължина &ndash; 50 символа.<br /> <em>(позволени са само букви)</em></p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="147">
+                        <p><strong>Tel</strong></p>
+                    </td>
+                    <td width="122">
+                        <p>String</p>
+                    </td>
+                    <td width="172">
+                        <p>Телефон на пациент</p>
+                    </td>
+                    <td width="125">
+                        <p>Дължина &ndash; 10 цифри<br /> <em>(позволени са само цифр)</em></p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="147">
+                        <p><strong>Eml</strong></p>
+                    </td>
+                    <td width="122">
+                        <p>String</p>
+                    </td>
+                    <td width="172">
+                        <p>e-mail на пациент</p>
+                    </td>
+                    <td width="125">
+                        <p>Дължина &ndash; 75 символа.</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="147">
+                        <p><strong>AddInfo</strong></p>
+                    </td>
+                    <td width="122">
+                        <p>String</p>
+                    </td>
+                    <td width="172">
+                        <p>Допълнителна информация/оплаквания.</p>
+                    </td>
+                    <td width="125">
+                        <p>Дължина &ndash; 500 символа.</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="147">
+                        <p><strong>IsFirstTime</strong></p>
+                    </td>
+                    <td width="122">
+                        <p>Bool</p>
+                    </td>
+                    <td width="172">
+                        <p>Флаг &ndash; за първи път ли се посещава лекаря</p>
+                    </td>
+                    <td width="125">
+                        <p>1 &ndash; посещава за ПЪРВИ ПЪТ<br /> 0 &ndash; посещавал е и ПРЕДИ</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="147">
+                        <p><strong>Gender</strong></p>
+                    </td>
+                    <td width="122">
+                        <p>String</p>
+                    </td>
+                    <td width="172">
+                        <p>Пол на пациента</p>
+                    </td>
+                    <td width="125">
+                        <p>M - мъж, FM - жена, DK - не желая да посоча.</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="147">
+                        <p><strong>ReasonId</strong></p>
+                    </td>
+                    <td width="122">
+                        <p>Integer</p>
+                    </td>
+                    <td width="172">
+                        <p>Id на причина за посещение на пациента</p>
+                    </td>
+                    <td width="125">
+                        <p>Може да се вземе от 2.4. Get Available Reasons<br /> <em>(</em><em>Трябва да е &gt; 0)</em>
+                        </p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="147">
+                        <p><strong>DocId</strong></p>
+                    </td>
+                    <td width="122">
+                        <p>Integer</p>
+                    </td>
+                    <td width="172">
+                        <p>Id на доктора</p>
+                    </td>
+                    <td width="125">
+                        <p>Трябва да е &gt; 0.</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="147">
+                        <p><strong>BokDate</strong></p>
+                    </td>
+                    <td width="122">
+                        <p>Date</p>
+                    </td>
+                    <td width="172">
+                        <p>Дата, в която пациентът иска да бъде запазен часът.</p>
+                    </td>
+                    <td width="125">
+                        <p>Трябва да е във формат yyyy-MM-dd. Трябва да е по-голяма от днешна дата.</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="147">
+                        <p><strong>BokTime</strong></p>
+                    </td>
+                    <td width="122">
+                        <p>Time</p>
+                    </td>
+                    <td width="172">
+                        <p>Час, който да бъде запазен.</p>
+                    </td>
+                    <td width="125">
+                        <p>Трябва да е във формат hh:mm, като hh да е между 0 и 23 и mm да е между 0 и 59.</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="147">
+                        <p><strong>Type</strong></p>
+                    </td>
+                    <td width="122">
+                        <p>String</p>
+                    </td>
+                    <td width="172">
+                        <p>Тип на върнатия резултат.</p>
+                    </td>
+                    <td width="125">
+                        <p>Възможни параметри са <strong>json</strong> или <strong>xml</strong>.</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <p>&nbsp;</p>
+        <p>&nbsp;</p>
+        <p>&nbsp;</p>
+        <h4>2.5.2. Примери</h4>
+        <table class="Examples">
+            <tbody>
+                <tr>
+                    <td width="566">
+                        <p><strong>BODY - Пример</strong></p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="566">
+                        <p>{</p>
+                        <p>&nbsp;&nbsp;&nbsp; "Fname" : "API",</p>
+                        <p>&nbsp;&nbsp;&nbsp; "Lname" : "Test",</p>
+                        <p>&nbsp;&nbsp;&nbsp; "Tel" : "0881145781",</p>
+                        <p>&nbsp;&nbsp;&nbsp; "Eml" : "test@abv.bg",</p>
+                        <p>&nbsp;&nbsp;&nbsp; "AddInfo" : "Testing the API for 3 time. And commas, should work now. (I
+                            think so)",</p>
+                        <p>&nbsp;&nbsp;&nbsp; "IsFirstTime" : "1",</p>
+                        <p>&nbsp;&nbsp;&nbsp; "Gender" : "dk",</p>
+                        <p>&nbsp;&nbsp;&nbsp; "ReasonId" : "1",</p>
+                        <p>&nbsp;&nbsp;&nbsp; "DocId" : "3",</p>
+                        <p>&nbsp;&nbsp;&nbsp; "BokDate" : "2020-11-21",</p>
+                        <p>&nbsp;&nbsp;&nbsp; "BokTime" : "12:00"</p>
+                        <p>&nbsp;</p>
+                        <p>&nbsp;</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="566">
+                        <p><a
+                                href="http://localhost:%7bport_number%7d/api/bookings?type=json">http://localhost:{port_number}/api/bookings?type=json</a>
+                        </p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="566">
+                        <p>"Your&nbsp;booking&nbsp;is&nbsp;created&nbsp;successfully.&nbsp;Booking&nbsp;Reference:&nbsp;20201205120018"
+                        </p>
+                        <p>&nbsp;</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="566">
+                        <p>&nbsp;</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <h4>2.5.3. Описание на Response</h4>
+        <ul>
+            <li>При успех
+                <ul>
+                    <li>Връща се съобщение с успех и референция към запазения час, която е уникална.</li>
+                    <li>Status code = 200</li>
+                </ul>
+            </li>
+            <li>При неуспех
+                <ul>
+                    <li>Връща се съобщение с грешката.</li>
+                </ul>
+            </li>
+        </ul>
+        <p>&nbsp;</p>
+        <h3><a name="_Toc57892347"></a>2.6. PUT Update Booking</h3>
+        <ul>
+            <li>Обновява&nbsp;данни&nbsp;за&nbsp;запазения&nbsp;час.</li>
+            <li>Всички параметри са същите като при Create Booking метода. Единствената разлика е, че тук трябва да бъде
+                подадена референция, която искате да редактирате.</li>
+        </ul>
+        <p>&nbsp;</p>
+        <h4>2.6.1. Параметри</h4>
+        <table class="CustomTable">
+            <tbody>
+                <tr>
+                    <td width="147">
+                        <p><strong>ПАРАМЕТЪР</strong></p>
+                    </td>
+                    <td width="122">
+                        <p><strong>ТИП ДАННИ</strong></p>
+                    </td>
+                    <td width="172">
+                        <p><strong>ОПИСАНИЕ</strong></p>
+                    </td>
+                    <td width="125">
+                        <p><strong>ЗАБЕЛЕЖКИ</strong></p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="147">
+                        <p><strong>Reference</strong></p>
+                    </td>
+                    <td width="122">
+                        <p>String</p>
+                    </td>
+                    <td width="172">
+                        <p>Референция към запазения час, която се генерира при запазване на час.</p>
+                    </td>
+                    <td width="125">
+                        <p>Референцията се връща при успешно изпълнение на Create Booking &ndash; 2.5.</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="147">
+                        <p><strong>Fname</strong></p>
+                    </td>
+                    <td width="122">
+                        <p>String</p>
+                    </td>
+                    <td width="172">
+                        <p>Име на пациент.</p>
+                    </td>
+                    <td width="125">
+                        <p>Дължина &ndash; 50 символа.<br /> <em>(позволени са само букви)</em></p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="147">
+                        <p><strong>Lname</strong></p>
+                    </td>
+                    <td width="122">
+                        <p>String</p>
+                    </td>
+                    <td width="172">
+                        <p>Фамилия на пациент</p>
+                    </td>
+                    <td width="125">
+                        <p>Дължина &ndash; 50 символа.<br /> <em>(позволени са само букви)</em></p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="147">
+                        <p><strong>Tel</strong></p>
+                    </td>
+                    <td width="122">
+                        <p>String</p>
+                    </td>
+                    <td width="172">
+                        <p>Телефон на пациент</p>
+                    </td>
+                    <td width="125">
+                        <p>Дължина &ndash; 10 цифри<br /> <em>(позволени са само цифр)</em></p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="147">
+                        <p><strong>Eml</strong></p>
+                    </td>
+                    <td width="122">
+                        <p>String</p>
+                    </td>
+                    <td width="172">
+                        <p>e-mail на пациент</p>
+                    </td>
+                    <td width="125">
+                        <p>Дължина &ndash; 75 символа.</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="147">
+                        <p><strong>AddInfo</strong></p>
+                    </td>
+                    <td width="122">
+                        <p>String</p>
+                    </td>
+                    <td width="172">
+                        <p>Допълнителна информация/оплаквания.</p>
+                    </td>
+                    <td width="125">
+                        <p>Дължина &ndash; 500 символа.</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="147">
+                        <p><strong>IsFirstTime</strong></p>
+                    </td>
+                    <td width="122">
+                        <p>Bool</p>
+                    </td>
+                    <td width="172">
+                        <p>Флаг &ndash; за първи път ли се посещава лекаря</p>
+                    </td>
+                    <td width="125">
+                        <p>1 &ndash; посещава за ПЪРВИ ПЪТ<br /> 0 &ndash; посещавал е и ПРЕДИ</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="147">
+                        <p><strong>Gender</strong></p>
+                    </td>
+                    <td width="122">
+                        <p>String</p>
+                    </td>
+                    <td width="172">
+                        <p>Пол на пациента</p>
+                    </td>
+                    <td width="125">
+                        <p>M - мъж, FM - жена, DK - не желая да посоча.</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="147">
+                        <p><strong>ReasonId</strong></p>
+                    </td>
+                    <td width="122">
+                        <p>Integer</p>
+                    </td>
+                    <td width="172">
+                        <p>Id на причина за посещение на пациента</p>
+                    </td>
+                    <td width="125">
+                        <p>Може да се вземе от 2.4. Get Available Reasons<br /> <em>(</em><em>Трябва да е &gt; 0)</em>
+                        </p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="147">
+                        <p><strong>DocId</strong></p>
+                    </td>
+                    <td width="122">
+                        <p>Integer</p>
+                    </td>
+                    <td width="172">
+                        <p>Id на доктора</p>
+                    </td>
+                    <td width="125">
+                        <p>Трябва да е &gt; 0.</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="147">
+                        <p><strong>BokDate</strong></p>
+                    </td>
+                    <td width="122">
+                        <p>Date</p>
+                    </td>
+                    <td width="172">
+                        <p>Дата, в която пациентът иска да бъде запазен часът.</p>
+                    </td>
+                    <td width="125">
+                        <p>Трябва да е във формат yyyy-MM-dd. Трябва да е по-голяма от днешна дата.</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="147">
+                        <p><strong>BokTime</strong></p>
+                    </td>
+                    <td width="122">
+                        <p>Time</p>
+                    </td>
+                    <td width="172">
+                        <p>Час, който да бъде запазен.</p>
+                    </td>
+                    <td width="125">
+                        <p>Трябва да е във формат hh:mm, като hh да е между 0 и 23 и mm да е между 0 и 59.</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="147">
+                        <p><strong>Type</strong></p>
+                    </td>
+                    <td width="122">
+                        <p>String</p>
+                    </td>
+                    <td width="172">
+                        <p>Тип на върнатия резултат.</p>
+                    </td>
+                    <td width="125">
+                        <p>Възможни параметри са <strong>json</strong> или <strong>xml</strong>.</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <p>&nbsp;</p>
+        <p>&nbsp;</p>
+        <p>&nbsp;</p>
+        <h4>2.6.2. Примери</h4>
+        <table class="Examples">
+            <tbody>
+                <tr>
+                    <td width="566">
+                        <p><strong>BODY - Пример</strong></p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="566">
+                        <p>{&nbsp;&nbsp;&nbsp; "Reference" : "20201205120018",&nbsp;&nbsp;&nbsp; "Fname" :
+                            "Proba",&nbsp;&nbsp;&nbsp; "Lname" : "Test",&nbsp;&nbsp;&nbsp; "Tel" :
+                            "0881111111",&nbsp;&nbsp;&nbsp; "Eml" : "test5@abv.bg",&nbsp;&nbsp;&nbsp; "AddInfo" :
+                            "Testing the API for 4 time. And commas, should work now. (I think so)",&nbsp;&nbsp;&nbsp;
+                            "IsFirstTime" : "1",&nbsp;&nbsp;&nbsp; "Gender" : "m",&nbsp;&nbsp;&nbsp; "ReasonId" :
+                            "2",&nbsp;&nbsp;&nbsp; "DocId" : "3",&nbsp;&nbsp;&nbsp; "BokDate" :
+                            "2020-11-21",&nbsp;&nbsp;&nbsp; "BokTime" : "12:00"&nbsp;}</p>
+                        <p>&nbsp;</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="566">
+                        <p><a
+                                href="http://localhost:%7bport_number%7d/api/bookings?type=json">http://localhost:{port_number}/api/bookings?type=json</a>
+                        </p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="566">
+                        <p>{</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;"APIerrorCode":&nbsp;"0",</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;"Status":&nbsp;200,</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;"Message":&nbsp;"Your&nbsp;booking&nbsp;has&nbsp;been&nbsp;edited&nbsp;successfully."
+                        </p>
+                        <p>}</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="566">
+                        <p>&nbsp;</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <p>&nbsp;</p>
+        <h4>2.6.3. Описание на Response</h4>
+        <table class="CustomTable" width="0">
+            <tbody>
+                <tr>
+                    <td width="173">
+                        <p><strong>RESPONSE KEY</strong></p>
+                    </td>
+                    <td width="470">
+                        <p><strong>ОПИСАНИЕ</strong></p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="173">
+                        <p><strong>APIerrorCode</strong></p>
+                    </td>
+                    <td width="470">
+                        <p>Код на грешка от базата данни.<br /> <strong>0 означава, че няма грешка.</strong></p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="173">
+                        <p><strong>Status</strong></p>
+                    </td>
+                    <td width="470">
+                        <p>Статус</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="173">
+                        <p><strong>Message</strong></p>
+                    </td>
+                    <td width="470">
+                        <p>Съобщение</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <p>&nbsp;</p>
+        <p>&nbsp;</p>
+        <p>&nbsp;</p>
+        
+        <h3><a name="_Toc57892348"></a>2.7. DELETE Cancel Booking</h3>
+        <ul>
+            <li>Методът анулира запазен час.</li>
+        </ul>
+        <p>&nbsp;</p>
+        <h4>2.7.1. Параметри</h4>
+        <table class="CustomTable">
+            <tbody>
+                <tr>
+                    <td width="154">
+                        <p><strong>ПАРАМЕТЪР</strong></p>
+                    </td>
+                    <td width="131">
+                        <p><strong>ТИП ДАННИ</strong></p>
+                    </td>
+                    <td width="154">
+                        <p><strong>ОПИСАНИЕ</strong></p>
+                    </td>
+                    <td width="127">
+                        <p><strong>ЗАБЕЛЕЖКИ</strong></p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="154">
+                        <p><strong>Reference</strong></p>
+                    </td>
+                    <td width="131">
+                        <p>String</p>
+                    </td>
+                    <td width="154">
+                        <p>Референция към запазения час, която се генерира при запазване на час.</p>
+                    </td>
+                    <td width="127">
+                        <p>Референцията се връща при успешно изпълнение на Create Booking &ndash; 2.5.</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="154">
+                        <p><strong>Type</strong></p>
+                    </td>
+                    <td width="131">
+                        <p>String</p>
+                    </td>
+                    <td width="154">
+                        <p>Тип на върнатия резултат.</p>
+                    </td>
+                    <td width="127">
+                        <p>Възможни параметри са <strong>json</strong> или <strong>xml</strong>.</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <p>&nbsp;</p>
+        <p>&nbsp;</p>
+        <p>&nbsp;</p>
+        <h4>2.7.2. Примери</h4>
+        <table class="Examples">
+            <tbody>
+                <tr>
+                    <td width="566">
+                        <p><strong>BODY - Пример</strong></p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="566">
+                        <p>{&nbsp;&nbsp;&nbsp; "20201205110019"}</p>
+                        <p>&nbsp;</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="566">
+                        <p><a
+                                href="http://localhost:%7bport_number%7d/api/bookings?type=json">http://localhost:{port_number}/api/bookings?type=json</a>
+                        </p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="566">
+                        <p>{</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;"APIerrorCode":&nbsp;"0",</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;"Status":&nbsp;200,</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;"Message":&nbsp;"Booking&nbsp;Canceled&nbsp;successfully."</p>
+                        <p>}</p>
+                        <p>&nbsp;</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="566">
+                        <p>&nbsp;</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <p>&nbsp;</p>
+        <h4>2.7.3. Описание на Response</h4>
+        <table class="CustomTable" width="0">
+            <tbody>
+                <tr>
+                    <td width="173">
+                        <p><strong>RESPONSE KEY</strong></p>
+                    </td>
+                    <td width="470">
+                        <p><strong>ОПИСАНИЕ</strong></p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="173">
+                        <p><strong>APIerrorCode</strong></p>
+                    </td>
+                    <td width="470">
+                        <p>Код на грешка от базата данни.<br /> <strong>0 означава, че няма грешка.</strong></p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="173">
+                        <p><strong>Status</strong></p>
+                    </td>
+                    <td width="470">
+                        <p>Статус</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="173">
+                        <p><strong>Message</strong></p>
+                    </td>
+                    <td width="470">
+                        <p>Съобщение</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <p>&nbsp;</p>
+        <p>&nbsp;</p>
+
+        <h3><a name="_Toc57892352"></a>2.8. GET Booking Info</h3>
+        <ul>
+            <li>Връща данни за запазен час по референция.</li>
+        </ul>
+        <p>&nbsp;</p>
+        <h4>2.8.1. Параметри</h4>
+        <table class="CustomTable">
+            <tbody>
+                <tr>
+                    <td width="154">
+                        <p><strong>ПАРАМЕТЪР</strong></p>
+                    </td>
+                    <td width="131">
+                        <p><strong>ТИП ДАННИ</strong></p>
+                    </td>
+                    <td width="154">
+                        <p><strong>ОПИСАНИЕ</strong></p>
+                    </td>
+                    <td width="127">
+                        <p><strong>ЗАБЕЛЕЖКИ</strong></p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="154">
+                        <p><strong>Reference</strong></p>
+                    </td>
+                    <td width="131">
+                        <p>String</p>
+                    </td>
+                    <td width="154">
+                        <p>Референция към запазения час, която се генерира при запазване на час.</p>
+                    </td>
+                    <td width="127">
+                        <p>Референцията се връща при успешно изпълнение на Create Booking &ndash; 2.5.</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="154">
+                        <p><strong>Type</strong></p>
+                    </td>
+                    <td width="131">
+                        <p>String</p>
+                    </td>
+                    <td width="154">
+                        <p>Тип на върнатия резултат.</p>
+                    </td>
+                    <td width="127">
+                        <p>Възможни параметри са <strong>json</strong> или <strong>xml</strong>.</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <p>&nbsp;</p>
+        <p>&nbsp;</p>
+        <p>&nbsp;</p>
+        <h4>2.8.2. Примери</h4>
+        <table class="Examples">
+            <tbody>
+                <tr>
+                    <td width="566">
+                        <p><strong>Пример</strong></p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="566">
+                        <p><a
+                                href="http://localhost:{{PortNumber}}/api/bookings/202012121130111?type=json">http://localhost:{{PortNumber}}/api/bookings/202012121130111?type=json </a>
+                        </p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="589">
+                    <p>{</p>
+                    <p>&nbsp;&nbsp;&nbsp;&nbsp;"Reference":&nbsp;"202012121130111",</p>
+                    <p>&nbsp;&nbsp;&nbsp;&nbsp;"Fname":&nbsp;"APIto",</p>
+                    <p>&nbsp;&nbsp;&nbsp;&nbsp;"Lname":&nbsp;"Test",</p>
+                    <p>&nbsp;&nbsp;&nbsp;&nbsp;"Tel":&nbsp;"0881145781",</p>
+                    <p>&nbsp;&nbsp;&nbsp;&nbsp;"Eml":&nbsp;"test12@abv.bg",</p>
+                    <p>&nbsp;&nbsp;&nbsp;&nbsp;"AddInfo":&nbsp;"Testing&nbsp;the&nbsp;API&nbsp;for&nbsp;3&nbsp;time.&nbsp;And&nbsp;commas,&nbsp;should&nbsp;work&nbsp;now.&nbsp;(I&nbsp;think&nbsp;so)",</p>
+                    <p>&nbsp;&nbsp;&nbsp;&nbsp;"IsFirstTime":&nbsp;<strong>false</strong>,</p>
+                    <p>&nbsp;&nbsp;&nbsp;&nbsp;"Gender":&nbsp;"dk",</p>
+                    <p>&nbsp;&nbsp;&nbsp;&nbsp;"ReasonId":&nbsp;1,</p>
+                    <p>&nbsp;&nbsp;&nbsp;&nbsp;"DocId":&nbsp;3,</p>
+                    <p>&nbsp;&nbsp;&nbsp;&nbsp;"BokDate":&nbsp;"12-Dec-20&nbsp;12:00:00&nbsp;AM",</p>
+                    <p>&nbsp;&nbsp;&nbsp;&nbsp;"BokTime":&nbsp;"11:30:00"</p>
+                    <p>}</p>
+                    <p>&nbsp;</p>
+                    <p>&nbsp;</p>
+                    </td>
+                    </tr>
+                <tr>
+                    <td width="566">
+                        <p>&nbsp;</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <p>&nbsp;</p>
+        <h4>2.8.3. Описание на Response</h4>
+<table width="0">
+<tbody>
+<tr>
+<td width="173">
+<p><strong>RESPONSE KEY</strong></p>
+</td>
+<td width="470">
+<p><strong>ОПИСАНИЕ</strong></p>
+</td>
+</tr>
+<tr>
+<td width="173">
+<p><strong>Reference</strong></p>
+</td>
+<td width="470">
+<p>Уникална референция за запазения час</p>
+</td>
+</tr>
+<tr>
+<td width="173">
+<p><strong>Fname</strong></p>
+</td>
+<td width="470">
+<p>Име на пациента</p>
+</td>
+</tr>
+<tr>
+<td width="173">
+<p><strong>Lname</strong></p>
+</td>
+<td width="470">
+<p>Фамилия на пациента</p>
+</td>
+</tr>
+<tr>
+<td width="173">
+<p><strong>Tel</strong></p>
+</td>
+<td width="470">
+<p>Телефон на пациента</p>
+</td>
+</tr>
+<tr>
+<td width="173">
+<p><strong>Eml</strong></p>
+</td>
+<td width="470">
+<p>E-mail за контакт на пациента</p>
+</td>
+</tr>
+<tr>
+<td width="173">
+<p><strong>AddInfo</strong></p>
+</td>
+<td width="470">
+<p>Допълнителна информация за пациента</p>
+</td>
+</tr>
+<tr>
+<td width="173">
+<p><strong>IsFirstTime</strong></p>
+</td>
+<td width="470">
+<p>За първи път ли посещава лекаря</p>
+</td>
+</tr>
+<tr>
+<td width="173">
+<p><strong>Gender</strong></p>
+</td>
+<td width="470">
+<p>Пол на пациента</p>
+</td>
+</tr>
+<tr>
+<td width="173">
+<p><strong>ReasonId</strong></p>
+</td>
+<td width="470">
+<p>ID на причината за посещение на пациента</p>
+</td>
+</tr>
+<tr>
+<td width="173">
+<p><strong>DocId</strong></p>
+</td>
+<td width="470">
+<p>ID на лекаря, който пациента ще посещава</p>
+</td>
+</tr>
+<tr>
+<td width="173">
+<p><strong>BokDate</strong></p>
+</td>
+<td width="470">
+<p>Дата, в която пациентът е запазил час</p>
+</td>
+</tr>
+<tr>
+<td width="173">
+<p><strong>BokTime</strong></p>
+</td>
+<td width="470">
+<p>Час, който пациентът е запазил</p>
+</td>
+</tr>
+</tbody>
+</table>
+        <p>&nbsp;</p>
+        <p>&nbsp;</p>
+
+        <h3><a name="_Toc57892349"></a>2.9. Error Handling</h3>
+        <ul>
+            <li>За всички методи &ndash; при възникване на грешка се връща json със следния вид:</li>
+        </ul>
+        <p>&nbsp;</p>
+        <table>
+            <tbody>
+                <tr>
+                    <td width="566">
+                        <p><strong>Error Response</strong></p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="566">
+                        <p>{</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;"APIerrorCode":&nbsp;"0",</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;"Status":&nbsp;200,</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;"Message":&nbsp;"Booking&nbsp;Canceled&nbsp;successfully."</p>
+                        <p>}</p>
+                        <p>&nbsp;</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <p>&nbsp;</p>
+        <p>Където всяко от полето означава:</p>
+        <table width="0">
+            <tbody>
+                <tr>
+                    <td width="173">
+                        <p><strong>RESPONSE KEY</strong></p>
+                    </td>
+                    <td width="470">
+                        <p><strong>ОПИСАНИЕ</strong></p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="173">
+                        <p><strong>APIerrorCode</strong></p>
+                    </td>
+                    <td width="470">
+                        <p>Код на грешка от базата данни.<br /> <strong>0 означава, че няма грешка.</strong></p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="173">
+                        <p><strong>Status</strong></p>
+                    </td>
+                    <td width="470">
+                        <p>Статус</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="173">
+                        <p><strong>Message</strong></p>
+                    </td>
+                    <td width="470">
+                        <p>Съобщение</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <p>&nbsp;</p>
+        <p>Чрез запазване на APIerrorCode по-лесно може да бъде правена поддръжка от страна на разработчиците, тъй като
+            всеки код на грешката е уникален и по него може да се открива бързо и лесно.</p>
+        <p>&nbsp;</p>
+        <h3><a name="_Toc57892350"></a>2.10. Кодове на грешки</h3>
+        <h4>2.10.1. В API</h4>
+        <table>
+            <tbody>
+                <tr>
+                    <td width="636">
+                        <table width="0">
+                            <tbody>
+                                <tr>
+                                    <td width="67">
+                                        <p><strong>1007</strong></p>
+                                    </td>
+                                    <td width="554">
+                                        <p>AddInfo Length must be less than 500 symbols.</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="67">
+                                        <p><strong>1009</strong></p>
+                                    </td>
+                                    <td width="554">
+                                        <p>Date must be greater or equal to Today's date.</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="67">
+                                        <p><strong>1016</strong></p>
+                                    </td>
+                                    <td width="554">
+                                        <p>No doctors to show.</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="67">
+                                        <p><strong>1010</strong></p>
+                                    </td>
+                                    <td width="554">
+                                        <p>The parameter must not be empty.</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="67">
+                                        <p><strong>1011</strong></p>
+                                    </td>
+                                    <td width="554">
+                                        <p>The parameter must be greater than zero.</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="67">
+                                        <p><strong>1012</strong></p>
+                                    </td>
+                                    <td width="554">
+                                        <p>Invalid input.</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="67">
+                                        <p><strong>1003</strong></p>
+                                    </td>
+                                    <td width="554">
+                                        <p>Parameter must contain only chars and numbers.</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="67">
+                                        <p><strong>1002</strong></p>
+                                    </td>
+                                    <td width="554">
+                                        <p>Parameter must contain chars only.</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="67">
+                                        <p><strong>1005</strong></p>
+                                    </td>
+                                    <td width="554">
+                                        <p>Parameter must be in correct date format.</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="67">
+                                        <p><strong>1001</strong></p>
+                                    </td>
+                                    <td width="554">
+                                        <p>Parameter must be in correct e-mail format.</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="67">
+                                        <p><strong>1004</strong></p>
+                                    </td>
+                                    <td width="554">
+                                        <p>Parameter must contain numbers only.</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="67">
+                                        <p><strong>1006</strong></p>
+                                    </td>
+                                    <td width="554">
+                                        <p>Parameter must be in correct time format.</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="67">
+                                        <p><strong>1000</strong></p>
+                                    </td>
+                                    <td width="554">
+                                        <p>There is no error.</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="67">
+                                        <p><strong>1013</strong></p>
+                                    </td>
+                                    <td width="554">
+                                        <p>There are no reasons to show.</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="67">
+                                        <p><strong>1014</strong></p>
+                                    </td>
+                                    <td width="554">
+                                        <p>PageNumber must be greater than or equal to zero.</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="67">
+                                        <p><strong>1015</strong></p>
+                                    </td>
+                                    <td width="554">
+                                        <p>PageSize must be greater than or equal to zero.</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="67">
+                                        <p><strong>0</strong></p>
+                                    </td>
+                                    <td width="554">
+                                        <p>Success. OK.</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="67">
+                                        <p><strong>1008</strong></p>
+                                    </td>
+                                    <td width="554">
+                                        <p>Telephone must be less than or equal to 10 digits.</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="67">
+                                        <p><strong>1009</strong></p>
+                                    </td>
+                                    <td width="554">
+                                        <p>You need to provide your APIKey in order to access the API.</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <p>&nbsp;</p>
+        <p>&nbsp;</p>
+        <h4>2.10.2. В базата данни</h4>
+        <table>
+            <tbody>
+                <tr>
+                    <td width="629">
+                        <table width="0">
+                            <tbody>
+                                <tr>
+                                    <td width="57">
+                                        <p><strong>106</strong></p>
+                                    </td>
+                                    <td colspan="2" width="557">
+                                        <p>Gender must be m fm or dk.</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="57">
+                                        <p><strong>107</strong></p>
+                                    </td>
+                                    <td colspan="2" width="557">
+                                        <p>There is no such reason ID.</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="57">
+                                        <p><strong>108</strong></p>
+                                    </td>
+                                    <td colspan="2" width="557">
+                                        <p>Doctor with this id does not exist.</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="57">
+                                        <p><strong>102</strong></p>
+                                    </td>
+                                    <td width="518">
+                                        <p>You cannot make a booking in previous date or hour.</p>
+                                    </td>
+                                    <td width="39">
+                                        <p>&nbsp;</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="57">
+                                        <p><strong>103</strong></p>
+                                    </td>
+                                    <td width="518">
+                                        <p>You cannot make a booking in later than today + @p_max_bok_day day.</p>
+                                    </td>
+                                    <td width="39">
+                                        <p>&nbsp;</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="57">
+                                        <p><strong>104</strong></p>
+                                    </td>
+                                    <td width="518">
+                                        <p>You cannot make a booking at this date because the doctor does not work at
+                                            this day.</p>
+                                    </td>
+                                    <td width="39">
+                                        <p>&nbsp;</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="57">
+                                        <p><strong>105</strong></p>
+                                    </td>
+                                    <td width="518">
+                                        <p>You cannot make a booking at this time because the doctor does not work at
+                                            this hour.</p>
+                                    </td>
+                                    <td width="39">
+                                        <p>&nbsp;</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="57">
+                                        <p><strong>101</strong></p>
+                                    </td>
+                                    <td width="518">
+                                        <p>You cannot book at this hour because there is already an existing booking.
+                                        </p>
+                                    </td>
+                                    <td width="39">
+                                        <p>&nbsp;</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="57">
+                                        <p><strong>203</strong></p>
+                                    </td>
+                                    <td width="518">
+                                        <p>There is no booking with this Reference.</p>
+                                    </td>
+                                    <td width="39">
+                                        <p>&nbsp;</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="57">
+                                        <p><strong>201</strong></p>
+                                    </td>
+                                    <td width="518">
+                                        <p>This booking is already canceled.</p>
+                                    </td>
+                                    <td width="39">
+                                        <p>&nbsp;</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="57">
+                                        <p><strong>202</strong></p>
+                                    </td>
+                                    <td width="518">
+                                        <p>You cannot cancel a booking which date or hour is in the past.</p>
+                                    </td>
+                                    <td width="39">
+                                        <p>&nbsp;</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="57">
+                                        <p><strong>300</strong></p>
+                                    </td>
+                                    <td width="518">
+                                        <p>You are using APIKey that not exists on this system. Please check again your
+                                            APIKey.</p>
+                                    </td>
+                                    <td width="39">
+                                        <p>&nbsp;</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="57">
+                                        <p><strong>301</strong></p>
+                                    </td>
+                                    <td width="518">
+                                        <p>Your APIKey has expired at ***date***. Please register a new one.</p>
+                                    </td>
+                                    <td width="39">
+                                        <p>&nbsp;</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <p>&nbsp;</p>
+        <p>&nbsp;</p>
+        <p>&nbsp;</p>
+        <p>&nbsp;</p>
+        <p>&nbsp;</p>
+        <p>&nbsp;</p>
+        <p>&nbsp;</p>
+        <p>&nbsp;</p>
+        <p>&nbsp;</p>
+
+        <footer>
+            <p><a href="https://radoslav-batinov.bss.design" target="_blank">Eng. Radoslav Batinov</a> | RestAPI Запазване на час при лекар </p>
+        </footer>
+
+    </div>
+
+</body>
+</html>
